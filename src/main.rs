@@ -15,7 +15,7 @@ fn main() {
         })
         .build())
     .add_systems(Startup, (setup,spawnCounter, spawnPlayer))
-    .add_systems(Update, (character_movement, melt))
+    .add_systems(Update, (character_movement, melt,move_camera))
     .init_resource::<Health>()
     .run();
 }
@@ -26,7 +26,7 @@ fn setup(mut commands:Commands){
 
     camera.projection.scaling_mode = ScalingMode::AutoMin {
         min_width: 256.0,
-        min_height: 144.0,
+        min_height: 128.0,
     };
 
     commands.spawn(camera);
@@ -34,7 +34,17 @@ fn setup(mut commands:Commands){
 
 }
 
+fn move_camera(
+    mut q: Query<(&mut Transform, &Camera), Without<Player>>,
+    player: Query<&Transform, With<Player>>
+){
+    let player_transform = player.get_single().expect("more than one player");
+        for (mut transform, _) in &mut q{
+            transform.translation.y = player_transform.translation.y;
+            transform.translation.x = player_transform.translation.x;
+        }
 
+}
 fn spawnCounter(mut commands:Commands, asset_server: Res<AssetServer>){
     let texture = asset_server.load("counter1.png");
     let tex= asset_server.load("kitchenbg1.png");
